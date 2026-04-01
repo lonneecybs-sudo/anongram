@@ -1,18 +1,28 @@
-#!/data/data/com.termux/files/usr/bin/bash
+#!/bin/bash
 
-echo "[*] Установка зависимостей для Anongram..."
-pkg update -y && pkg upgrade -y
-pkg install nodejs -y
+echo "⚙️ Сборка и установка сети Anongram..."
 
-# Создаем папку проекта
-mkdir -p anongram && cd anongram
+# 1. Установка системных зависимостей
+pkg install nodejs curl -y
 
-# Инициализация и установка модулей
-npm init -y
-npm install hyperswarm crypto b4a
+# 2. Создание системной папки
+mkdir -p ~/.anongram
+cd ~/.anongram
 
-# Создаем файл запуска
-echo "node index.js" > start.sh
-chmod +x start.sh
+# 3. Скачивание ядра (замени lonneecybs-sudo на свой точный ник в ссылке, если надо)
+curl -sL https://raw.githubusercontent.com/lonneecybs-sudo/anongram/main/index.js -o index.js
 
-echo "[+] Установка завершена. Запуск: ./start.sh"
+# 4. Установка сетевого протокола MQTT (занимает пару секунд)
+echo "📦 Настройка P2P протоколов..."
+npm install mqtt --quiet
+
+# 5. Права и Симлинк в систему
+chmod +x index.js
+if [ -d "$PREFIX/bin" ]; then
+    ln -sf ~/.anongram/index.js $PREFIX/bin/anongram
+else
+    sudo ln -sf ~/.anongram/index.js /usr/local/bin/anongram
+fi
+
+echo -e "\n🔥 СИСТЕМА УСТАНОВЛЕНА!"
+echo "Для входа в сеть введи команду: anongram"
