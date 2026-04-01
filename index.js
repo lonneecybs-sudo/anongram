@@ -4,49 +4,199 @@ const mqtt = require('mqtt');
 const readline = require('readline');
 const crypto = require('crypto');
 
-// --- ЦВЕТОВАЯ ПАЛИТРА ---
+// --- РАСШИРЕННАЯ ПАЛИТРА С ВЕРТИКАЛЬНОЙ ОПТИМИЗАЦИЕЙ ---
 const C = {
-    res: "\x1b[0m",
-    b: "\x1b[1m",
-    d: "\x1b[2m",
-    // Темы
-    matrix: { m: "\x1b[32m", s: "\x1b[36m", t: "MATRIX" },
-    robot:  { m: "\x1b[31m", s: "\x1b[37m", t: "FSOCIETY" },
-    ghost:  { m: "\x1b[35m", s: "\x1b[34m", t: "GHOST" }
+    reset: "\x1b[0m",
+    bold: "\x1b[1m",
+    dim: "\x1b[2m",
+    italic: "\x1b[3m",
+    
+    // Основные цвета
+    black: "\x1b[30m",
+    red: "\x1b[31m",
+    green: "\x1b[32m",
+    yellow: "\x1b[33m",
+    blue: "\x1b[34m",
+    magenta: "\x1b[35m",
+    cyan: "\x1b[36m",
+    white: "\x1b[37m",
+    
+    // Яркие версии
+    brightRed: "\x1b[91m",
+    brightGreen: "\x1b[92m",
+    brightYellow: "\x1b[93m",
+    brightBlue: "\x1b[94m",
+    brightMagenta: "\x1b[95m",
+    brightCyan: "\x1b[96m",
+    brightWhite: "\x1b[97m"
 };
 
-let T = C.matrix;
+// --- ВЕРТИКАЛЬНЫЕ ТЕМЫ (компактные, но стильные) ---
+const Themes = {
+    matrix: {
+        name: "🌿 MATRIX",
+        primary: C.green,
+        secondary: C.brightGreen,
+        accent: C.yellow,
+        border: C.green,
+        error: C.red,
+        success: C.brightGreen,
+        info: C.cyan,
+        logo: `
+${C.green}╔════════════════════╗
+║  █████╗ ███╗   ██╗ ║
+║ ██╔══██╗████╗  ██║ ║
+║ ███████║██╔██╗ ██║ ║
+║ ██╔══██║██║╚██╗██║ ║
+║ ██║  ██║██║ ╚████║ ║
+║ ╚═╝  ╚═╝╚═╝  ╚═══╝ ║
+╚════════════════════╝
+${C.dim}└── MATRIX EDITION ──┘${C.reset}`
+    },
+    robot: {
+        name: "🤖 FSOCIETY",
+        primary: C.red,
+        secondary: C.brightRed,
+        accent: C.brightYellow,
+        border: C.red,
+        error: C.brightRed,
+        success: C.green,
+        info: C.blue,
+        logo: `
+${C.red}╔════════════════════╗
+║  ███████╗███████╗  ║
+║  ██╔════╝██╔════╝  ║
+║  █████╗  ███████╗  ║
+║  ██╔══╝  ╚════██║  ║
+║  ██║     ███████║  ║
+║  ╚═╝     ╚══════╝  ║
+╚════════════════════╝
+${C.dim}└── FSOCIETY MODE ──┘${C.reset}`
+    },
+    ghost: {
+        name: "👻 GHOST",
+        primary: C.magenta,
+        secondary: C.brightMagenta,
+        accent: C.cyan,
+        border: C.magenta,
+        error: C.red,
+        success: C.green,
+        info: C.brightCyan,
+        logo: `
+${C.magenta}╔════════════════════╗
+║  ██████╗ ██╗  ██╗ ║
+║  ██╔════╝██║  ██║ ║
+║  ██║     ███████║ ║
+║  ██║     ██╔══██║ ║
+║  ╚██████╗██║  ██║ ║
+║   ╚═════╝╚═╝  ╚═╝ ║
+╚════════════════════╝
+${C.dim}└── GHOST MODE ────┘${C.reset}`
+    },
+    sunset: {
+        name: "🌅 SUNSET",
+        primary: C.brightYellow,
+        secondary: C.brightRed,
+        accent: C.brightMagenta,
+        border: C.yellow,
+        error: C.red,
+        success: C.green,
+        info: C.cyan,
+        logo: `
+${C.brightYellow}╔════════════════════╗
+║  ☀️  ANONGRAM  🌙  ║
+║  ┌────────────┐   ║
+║  │  SUNSET    │   ║
+║  │  EDITION   │   ║
+║  └────────────┘   ║
+║  ✨ v4.0 ✨       ║
+╚════════════════════╝
+${C.dim}└── SUNSET MODE ───┘${C.reset}`
+    }
+};
+
+let T = Themes.matrix;
 let room = 'global';
-let user = 'an' + crypto.randomBytes(1).toString('hex');
+let user = '👤' + crypto.randomBytes(1).toString('hex');
 let isAdmin = false;
+let lastMessages = [];
 
-// --- МИНИ-ЛОГО (3 строки, влезет в любой телефон) ---
-const LOGO = (theme) => `
-${theme.m}■ ${theme.s}ANONGRAM ${theme.m}v4 ${theme.s}[MOBILE]${C.res}
-${theme.m}└───────────────────────${C.res}`;
-
-function drawUI() {
+// --- КОМПАКТНЫЕ ФУНКЦИИ ИНТЕРФЕЙСА ---
+function drawCompactHeader() {
     console.clear();
-    console.log(LOGO(T));
-    const role = isAdmin ? "ROOT" : "USER";
-    // Компактная статус-строка
-    console.log(`${C.d}ID:${C.res}${T.m}${user}${C.res} | ${C.d}RM:${C.res}${T.s}${room}${C.res} | ${C.d}${role}${C.res}`);
-    console.log(`${T.m}───────────────────────${C.res}`);
+    console.log(T.logo);
+    
+    // Статус-бар в одну строку
+    const roleIcon = isAdmin ? '👑' : '👤';
+    const roomIcon = '💬';
+    const userIcon = '📝';
+    
+    console.log(`\n${T.border}┌────────────────────────┐${C.reset}`);
+    console.log(`${T.border}│ ${roomIcon} ${T.primary}${room.padEnd(12)}${C.reset} ${userIcon} ${T.accent}${user.padEnd(8)}${C.reset} ${T.border}│`);
+    console.log(`${T.border}│ ${roleIcon} ${isAdmin ? 'ADMIN' : 'USER'.padEnd(5)} ${T.dim}●${C.reset} ${T.secondary}${T.name.padEnd(12)}${C.reset} ${T.border}│`);
+    console.log(`${T.border}└────────────────────────┘${C.reset}\n`);
 }
 
-const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+function drawMiniHelp() {
+    console.log(`\n${T.accent}╔══════════════════════╗${C.reset}`);
+    console.log(`${T.accent}║  📚 QUICK COMMANDS  ║${C.reset}`);
+    console.log(`${T.accent}╚══════════════════════╝${C.reset}\n`);
+    
+    console.log(`${T.secondary}┌────────────────────┐${C.reset}`);
+    console.log(`${T.secondary}│ 💬 GENERAL         │${C.reset}`);
+    console.log(`${T.secondary}├────────────────────┤${C.reset}`);
+    console.log(`${T.secondary}│ /help    • help    │${C.reset}`);
+    console.log(`${T.secondary}│ /nick    • name    │${C.reset}`);
+    console.log(`${T.secondary}│ /theme   • style   │${C.reset}`);
+    console.log(`${T.secondary}│ /clear   • clean   │${C.reset}`);
+    console.log(`${T.secondary}├────────────────────┤${C.reset}`);
+    console.log(`${T.secondary}│ 🏠 ROOMS           │${C.reset}`);
+    console.log(`${T.secondary}├────────────────────┤${C.reset}`);
+    console.log(`${T.secondary}│ /room    • join    │${C.reset}`);
+    console.log(`${T.secondary}│ /croom   • create  │${C.reset}`);
+    
+    if (isAdmin) {
+        console.log(`${T.secondary}├────────────────────┤${C.reset}`);
+        console.log(`${T.secondary}│ 👑 ADMIN           │${C.reset}`);
+        console.log(`${T.secondary}├────────────────────┤${C.reset}`);
+        console.log(`${T.secondary}│ /kick    • kick    │${C.reset}`);
+    }
+    
+    console.log(`${T.secondary}└────────────────────┘${C.reset}\n`);
+    console.log(`${T.info}💡 Type message to chat${C.reset}\n`);
+}
 
-function setPrompt() {
-    const sym = isAdmin ? "#" : ">";
-    rl.setPrompt(`${T.m}${sym}${C.res} `);
+function displayMessage(sender, text, isOwn = false) {
+    const time = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+    
+    if (isOwn) {
+        console.log(`${C.dim}${time}${C.reset} ${T.accent}▶${C.reset} ${T.secondary}${sender}${C.reset}: ${T.primary}${text}${C.reset}`);
+    } else {
+        // Ограничиваем длину сообщения для телефона
+        const shortText = text.length > 50 ? text.slice(0, 47) + '...' : text;
+        console.log(`${C.dim}${time}${C.reset} ${T.primary}◀${C.reset} ${T.primary}${sender}${C.reset}: ${T.secondary}${shortText}${C.reset}`);
+    }
 }
 
 // --- СЕТЬ ---
-const client = mqtt.connect('mqtt://broker.hivemq.com');
+const client = mqtt.connect('mqtt://broker.hivemq.com', {
+    keepalive: 60,
+    reconnectPeriod: 1000
+});
 
 client.on('connect', () => {
-    drawUI();
+    drawCompactHeader();
     joinRoom('global');
+    console.log(`${T.success}✓ Connected to network${C.reset}`);
+    setTimeout(() => drawCompactHeader(), 1000);
+});
+
+client.on('reconnect', () => {
+    console.log(`\n${T.info}⟳ Reconnecting...${C.reset}`);
+});
+
+client.on('error', (err) => {
+    console.log(`\n${T.error}✗ Connection error${C.reset}`);
 });
 
 client.on('message', (topic, message) => {
@@ -55,17 +205,20 @@ client.on('message', (topic, message) => {
 
         if (data.type === 'sys') {
             if (data.act === 'kick' && data.tgt === user) {
-                console.log(`\n${C.b}${T.m}[!] KICKED BY ADMIN${C.res}`);
-                return joinRoom('global');
+                console.log(`\n${T.error}⚠️  KICKED FROM ROOM ⚠️${C.reset}`);
+                setTimeout(() => joinRoom('global'), 1500);
+                return;
             }
-            if (data.act === 'clr') { drawUI(); console.log(`${T.m}[!] Buffer cleared${C.res}`); }
+            if (data.act === 'clr') { 
+                drawCompactHeader();
+                console.log(`${T.success}✨ Screen cleared${C.reset}`);
+            }
             return;
         }
 
         if (data.type === 'msg' && data.u !== user) {
-            process.stdout.write('\r\x1b[K'); // Очистка строки ввода
-            const time = new Date().toLocaleTimeString().slice(0, 5);
-            console.log(`${C.d}${time}${C.res} ${T.m}${data.u}${C.res}: ${data.t}`);
+            process.stdout.write('\r\x1b[2K');
+            displayMessage(data.u, data.t);
             rl.prompt(true);
         }
     } catch (e) {}
@@ -76,43 +229,127 @@ function joinRoom(name, admin = false) {
     room = name;
     isAdmin = admin;
     client.subscribe(`anongram/v4/${room}`);
-    drawUI();
+    drawCompactHeader();
+    
+    const roleText = admin ? `${T.accent}admin${C.reset}` : `${T.secondary}user${C.reset}`;
+    console.log(`${T.success}✓ Joined "${T.primary}${room}${C.reset}" as ${roleText}${C.reset}`);
     setPrompt();
     rl.prompt();
 }
 
-// --- КОМАНДЫ ---
+// --- ИНТЕРФЕЙС ВВОДА ---
+const rl = readline.createInterface({ 
+    input: process.stdin, 
+    output: process.stdout,
+    terminal: true,
+    prompt: ''
+});
+
+function setPrompt() {
+    const promptSymbol = isAdmin ? `${T.accent}⚡${C.reset}` : `${T.secondary}➤${C.reset}`;
+    rl.setPrompt(`${promptSymbol} `);
+}
+
+// --- ОБРАБОТКА КОМАНД ---
 rl.on('line', (line) => {
     const input = line.trim();
-    if (!input) { rl.prompt(); return; }
+    if (!input) { 
+        rl.prompt(); 
+        return; 
+    }
 
     if (input.startsWith('/')) {
         const [cmd, ...args] = input.split(' ');
+        
         switch(cmd) {
             case '/help':
-                console.log(`\n${C.b}COMMANDS:${C.res}\n/croom [n] - Create(Admin)\n/room [n]  - Join\n/nick [n]  - Nickname\n/theme [matrix/robot/ghost]\n/kick [u]  - Admin only\n/clear     - Reset screen\n`);
+                drawMiniHelp();
                 break;
-            case '/croom': joinRoom(args[0] || 'private', true); break;
-            case '/room': joinRoom(args[0] || 'global', false); break;
-            case '/nick': user = args[0] || user; drawUI(); break;
-            case '/theme': if (C[args[0]]) { T = C[args[0]]; drawUI(); } break;
-            case '/clear': 
-                if (isAdmin) client.publish(`anongram/v4/${room}`, JSON.stringify({type:'sys', act:'clr'}));
-                else drawUI(); 
+                
+            case '/croom':
+                if (!args[0]) {
+                    console.log(`${T.error}✗ Room name required${C.reset}`);
+                } else {
+                    joinRoom(args[0], true);
+                }
                 break;
+                
+            case '/room':
+                joinRoom(args[0] || 'global', false);
+                break;
+                
+            case '/nick':
+                if (!args[0]) {
+                    console.log(`${T.error}✗ Nickname required${C.reset}`);
+                } else {
+                    user = args[0];
+                    drawCompactHeader();
+                    console.log(`${T.success}✓ Nickname changed to "${user}"${C.reset}`);
+                }
+                break;
+                
+            case '/theme':
+                if (!args[0]) {
+                    console.log(`${T.secondary}Themes: matrix, robot, ghost, sunset${C.reset}`);
+                } else if (Themes[args[0]]) {
+                    T = Themes[args[0]];
+                    drawCompactHeader();
+                    console.log(`${T.success}✓ Theme: ${T.name}${C.reset}`);
+                } else {
+                    console.log(`${T.error}✗ Theme "${args[0]}" not found${C.reset}`);
+                }
+                break;
+                
+            case '/clear':
+                if (isAdmin) {
+                    client.publish(`anongram/v4/${room}`, JSON.stringify({type:'sys', act:'clr'}));
+                    console.log(`${T.success}✓ Screen cleared for all${C.reset}`);
+                } else {
+                    drawCompactHeader();
+                    console.log(`${T.success}✓ Screen cleared${C.reset}`);
+                }
+                break;
+                
             case '/kick':
-                if (isAdmin) client.publish(`anongram/v4/${room}`, JSON.stringify({type:'sys', act:'kick', tgt: args[0]}));
+                if (!args[0]) {
+                    console.log(`${T.error}✗ Username required${C.reset}`);
+                } else if (isAdmin) {
+                    client.publish(`anongram/v4/${room}`, JSON.stringify({type:'sys', act:'kick', tgt: args[0]}));
+                    console.log(`${T.success}✓ Kicked: ${args[0]}${C.reset}`);
+                } else {
+                    console.log(`${T.error}✗ Admin only${C.reset}`);
+                }
+                break;
+                
+            default:
+                console.log(`${T.error}✗ Unknown command. Use /help${C.reset}`);
                 break;
         }
     } else {
+        // Отправка сообщения
         const payload = { type: 'msg', u: user, t: input };
-        client.publish(`anongram/v4/${room}`, payload.type ? JSON.stringify(payload) : "");
+        client.publish(`anongram/v4/${room}`, JSON.stringify(payload));
         
-        // Удаляем то, что ввел пользователь, и выводим красиво
-        process.stdout.write('\x1b[1A\x1b[2K'); 
-        const time = new Date().toLocaleTimeString().slice(0, 5);
-        console.log(`${C.d}${time}${C.res} ${C.b}YOU${C.res}: ${input}`);
+        // Очистка и отображение
+        process.stdout.write('\x1b[1A\x1b[2K');
+        displayMessage(user, input, true);
     }
+    
     setPrompt();
     rl.prompt();
 });
+
+// --- ОБРАБОТКА ВЫХОДА ---
+process.on('SIGINT', () => {
+    console.log(`\n${T.secondary}👋 Goodbye!${C.reset}`);
+    client.end();
+    rl.close();
+    process.exit(0);
+});
+
+// --- СТАРТ ---
+setTimeout(() => {
+    console.log(`${T.info}💡 Type /help for commands${C.reset}`);
+    setPrompt();
+    rl.prompt();
+}, 1500);
