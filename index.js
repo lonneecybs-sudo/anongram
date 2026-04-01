@@ -1,73 +1,75 @@
-#!/usr/bin/env node
+const hyperswarm = require('hyperswarm');
+const crypto = require('crypto');
+const readline = require('readline');
+const b4a = require('b4a');
 
-const TelegramBot = require('node-telegram-bot-api');
-const fs = require('fs');
-const path = require('path');
+const swarm = hyperswarm();
+let nickname = 'nonsport';
+let currentRoom = null;
 
-const configDir = path.join(process.env.HOME || process.env.USERPROFILE, '.anongram');
-const configFile = path.join(configDir, 'config.json');
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+    prompt: '>> '
+});
 
-// Создаем папку если нет
-if (!fs.existsSync(configDir)) fs.mkdirSync(configDir, { recursive: true });
-
-function startBot(token, adminId) {
-    const bot = new TelegramBot(token, { polling: true });
-    const dbFile = path.join(configDir, 'users.json');
-    
-    // Загрузка базы пользователей
-    let users = [];
-    if (fs.existsSync(dbFile)) users = JSON.parse(fs.readFileSync(dbFile));
-
-    console.log(`\n🚀 Anongram запущен!\nАдмин ID: ${adminId}\nКоманда: anongram`);
-
-    bot.on('message', (msg) => {
-        const chatId = msg.chat.id;
-        const text = msg.text;
-
-        if (!users.includes(chatId)) {
-            users.push(chatId);
-            fs.writeFileSync(dbFile, JSON.stringify(users));
-        }
-
-        // --- БЛОК АДМИНА ---
-        if (chatId == adminId) {
-            if (text === '/stats') {
-                return bot.sendMessage(adminId, `📊 Пользователей в базе: ${users.length}`);
-            }
-            if (text.startsWith('/broadcast ')) {
-                const broadcastText = text.replace('/broadcast ', '');
-                users.forEach(id => {
-                    bot.sendMessage(id, `📢 Сообщение от админа:\n\n${broadcastText}`);
-                });
-                return bot.sendMessage(adminId, `✅ Разослано ${users.length} юзерам.`);
-            }
-        }
-
-        // --- БЛОК ЮЗЕРА ---
-        if (text === '/start') {
-            bot.sendMessage(chatId, '🕵️ Добро пожаловать в анонимный чат!');
-        } else {
-            // Эхо-ответ или твоя логика анонимности
-            bot.sendMessage(chatId, `Сообщение получено анонимно.`);
-        }
-    });
-
-    bot.on('error', (err) => console.log('Ошибка:', err.message));
+// Шифрование (простой XOR на основе хеша комнаты)
+function crypt(data, key) {
+    const res = b4a.alloc(data.length);
+    for (let i = 0; i < data.length; i++) {
+        res[i] = data[i] ^ key[i % key.length];
+    }
+    return res;
 }
 
-// Проверка конфига
-if (fs.existsSync(configFile)) {
-    const config = JSON.parse(fs.readFileSync(configFile));
-    startBot(config.token, config.adminId);
-} else {
-    const readline = require('readline').createInterface({ input: process.stdin, output: process.stdout });
-    console.log('\n🔧 ПЕРВАЯ НАСТРОЙКА ANONGRAM');
-    readline.question('Введите токен бота: ', (token) => {
-        readline.question('Введите ваш Telegram ID: ', (adminId) => {
-            fs.writeFileSync(configFile, JSON.stringify({ token: token.trim(), adminId: adminId.trim() }, null, 2));
-            console.log('✅ Настройка завершена! Запускаю...');
-            readline.close();
-            startBot(token.trim(), adminId.trim());
+console.clear();
+console.log('╔══════════════════════════════════════╗');
+console.log('║       ANONGRAM P2P TERMINAL          ║');
+console.log('╚══════════════════════════════════════╝');
+
+rl.question('[?] Введите название комнаты: ', (roomName) => {
+    currentRoom = crypto.createHash('sha256').update(roomName).digest();
+    
+    const discovery = swarm.join(currentRoom, { lookup: true, announce: true });
+    
+    console.log(`[*] Вход в комнату: ${roomName}`);
+    console.log(`[*] Ожидание пиров...\n`);
+    rl.prompt();
+
+    swarm.on('connection', (socket) => {
+        socket.on('data', (data) => {
+            const decrypted = crypt(data, currentRoom).toString();
+            process.stdout.clearLine();
+            process.stdout.cursorTo(0);
+            console.log(decrypted);
+            rl.prompt();
         });
     });
-}
+
+    rl.on('line', (line) => {
+        const msg = line.trim();
+        if (!msg) return rl.prompt();
+
+        if (msg.startsWith('/')) {
+            const [cmd, arg] = msg.split(' ');
+            if (cmd === '/nick' && arg) {
+                nickname = arg;
+                console.log(`[*] Ник изменен на: ${nickname}`);
+            } else if (cmd === '/exit') {
+                process.exit();
+            } else if (cmd === '/peers') {
+                console.log(`[*] Пиров в сети: ${swarm.connections.size}`);
+            }
+            rl.prompt();
+            return;
+        }
+
+        const formattedMsg = `[${nickname}]: ${msg}`;
+        const encrypted = crypt(b4a.from(formattedMsg), currentRoom);
+
+        for (const socket of swarm.connections) {
+            socket.write(encrypted);
+        }
+        rl.prompt();
+    });
+});
