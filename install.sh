@@ -1,26 +1,18 @@
-#!/bin/bash
+#!/data/data/com.termux/files/usr/bin/bash
 
-echo "⚙️ Установка Anongram..."
+echo "[*] Установка зависимостей для Anongram..."
+pkg update -y && pkg upgrade -y
+pkg install nodejs -y
 
-# 1. Установка зависимостей
-pkg install nodejs curl -y
+# Создаем папку проекта
+mkdir -p anongram && cd anongram
 
-# 2. Создание папки
-mkdir -p ~/.anongram
-cd ~/.anongram
+# Инициализация и установка модулей
+npm init -y
+npm install hyperswarm crypto b4a
 
-# 3. Скачивание кода (замени ссылку на свою!)
-curl -sL https://raw.githubusercontent.com/lonneecybs-sudo/anongram/main/index.js -o index.js
+# Создаем файл запуска
+echo "node index.js" > start.sh
+chmod +x start.sh
 
-# 4. Установка библиотеки бота
-npm install node-telegram-bot-api --quiet
-
-# 5. Права и Симлинк
-chmod +x index.js
-if [ -d "$PREFIX/bin" ]; then
-    ln -sf ~/.anongram/index.js $PREFIX/bin/anongram
-else
-    sudo ln -sf ~/.anongram/index.js /usr/local/bin/anongram
-fi
-
-echo -e "\n✅ ГОТОВО! Теперь пиши команду: anongram"
+echo "[+] Установка завершена. Запуск: ./start.sh"
