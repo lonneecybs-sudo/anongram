@@ -4,54 +4,48 @@ const mqtt = require('mqtt');
 const readline = require('readline');
 const crypto = require('crypto');
 
-// --- КОНФИГУРАЦИЯ ЦВЕТОВ ---
+// --- ЦВЕТОВАЯ ПАЛИТРА ---
 const C = {
     res: "\x1b[0m",
     b: "\x1b[1m",
     d: "\x1b[2m",
-    // Цвета тем
-    matrix: { main: "\x1b[32m", sec: "\x1b[36m", err: "\x1b[31m" },
-    fsociety: { main: "\x1b[31m", sec: "\x1b[37m", err: "\x1b[33m" },
-    hack: { main: "\x1b[37m", sec: "\x1b[90m", err: "\x1b[31m" }
+    // Темы
+    matrix: { m: "\x1b[32m", s: "\x1b[36m", t: "MATRIX" },
+    robot:  { m: "\x1b[31m", s: "\x1b[37m", t: "FSOCIETY" },
+    ghost:  { m: "\x1b[35m", s: "\x1b[34m", t: "GHOST" }
 };
 
-let T = C.matrix; // По умолчанию Matrix
-let currentRoom = 'global';
-let username = 'anon_' + crypto.randomBytes(2).toString('hex');
+let T = C.matrix;
+let room = 'global';
+let user = 'an' + crypto.randomBytes(1).toString('hex');
 let isAdmin = false;
 
-// --- ИНТЕРФЕЙСНЫЕ МОДУЛИ ---
-const LOGO = `
-   ▄▄▄▄▀ ▄  █ ▄███▄      ▄     ▄▄▄▄▀ █▄▄▄▄ ▄███▄   █▀▄▀█ 
-▀▀▀ █   █   █ █▀   ▀      █ ▀▀▀ █    █  ▄▀ █▀   ▀  █ █ █ 
-    █   ██▀▀█ ██▄▄    ██   █    █    █▀▀▌  ██▄▄    █ ▄ █ 
-   █    █   █ █▄   ▄▀ █ █  █   █     █  █  █▄   ▄  █   █ 
-  ▀    Manual ▀███▀   █  █ █  ▀        █   ▀███▀      █  
-                      █   ██      Anongram v3.5    ▀   `;
+// --- МИНИ-ЛОГО (3 строки, влезет в любой телефон) ---
+const LOGO = (theme) => `
+${theme.m}■ ${theme.s}ANONGRAM ${theme.m}v4 ${theme.s}[MOBILE]${C.res}
+${theme.m}└───────────────────────${C.res}`;
 
-function drawHeader() {
+function drawUI() {
     console.clear();
-    console.log(`${T.main}${LOGO}${C.res}`);
-    const status = isAdmin ? "PRIVILEGED / ADMIN" : "STANDARD / USER";
-    console.log(`${C.b}${T.main}┌──────────────────────────────────────────────────────────┐${C.res}`);
-    console.log(`${C.b}${T.main}│${C.res}  ${C.b}IDENTITY:${C.res} ${T.sec}${username.padEnd(12)}${C.res} ${C.b}ROOM:${C.res} ${T.sec}${currentRoom.padEnd(12)}${C.res} ${C.b}STATUS:${C.res} ${T.main}${status.padEnd(18)}${C.res}${C.b}${T.main}│${C.res}`);
-    console.log(`${C.b}${T.main}└──────────────────────────────────────────────────────────┘${C.res}`);
-    console.log(`${C.d} Введите /help для вывода списка доступных протоколов${C.res}\n`);
+    console.log(LOGO(T));
+    const role = isAdmin ? "ROOT" : "USER";
+    // Компактная статус-строка
+    console.log(`${C.d}ID:${C.res}${T.m}${user}${C.res} | ${C.d}RM:${C.res}${T.s}${room}${C.res} | ${C.d}${role}${C.res}`);
+    console.log(`${T.m}───────────────────────${C.res}`);
 }
 
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 
-function updatePrompt() {
-    const symbol = isAdmin ? "ROOT#" : ">>";
-    rl.setPrompt(`${C.b}${T.main}${username}${C.res}${T.sec}@${currentRoom}${C.res} ${C.b}${symbol}${C.res} `);
+function setPrompt() {
+    const sym = isAdmin ? "#" : ">";
+    rl.setPrompt(`${T.m}${sym}${C.res} `);
 }
 
-// --- СЕТЕВАЯ ЧАСТЬ ---
+// --- СЕТЬ ---
 const client = mqtt.connect('mqtt://broker.hivemq.com');
 
 client.on('connect', () => {
-    drawHeader();
-    updatePrompt();
+    drawUI();
     joinRoom('global');
 });
 
@@ -59,76 +53,66 @@ client.on('message', (topic, message) => {
     try {
         const data = JSON.parse(message.toString());
 
-        if (data.type === 'system') {
-            if (data.action === 'kick' && data.target === username) {
-                console.log(`\n${C.b}${T.err}[ СИСТЕМА ] Вы были принудительно отключены админом.${C.res}`);
+        if (data.type === 'sys') {
+            if (data.act === 'kick' && data.tgt === user) {
+                console.log(`\n${C.b}${T.m}[!] KICKED BY ADMIN${C.res}`);
                 return joinRoom('global');
             }
-            if (data.action === 'clear') {
-                drawHeader();
-                console.log(`${T.main}[ СИСТЕМА ] Буфер сообщений очищен.${C.res}`);
-            }
+            if (data.act === 'clr') { drawUI(); console.log(`${T.m}[!] Buffer cleared${C.res}`); }
             return;
         }
 
-        if (data.type === 'chat' && data.user !== username) {
-            process.stdout.write('\x1b[2K\x1b[0G'); 
+        if (data.type === 'msg' && data.u !== user) {
+            process.stdout.write('\r\x1b[K'); // Очистка строки ввода
             const time = new Date().toLocaleTimeString().slice(0, 5);
-            console.log(`${C.d}[${time}]${C.res} ${T.main}${data.user.padStart(10)}${C.res} ${C.b}${T.sec}>>${C.res} ${data.text}`);
+            console.log(`${C.d}${time}${C.res} ${T.m}${data.u}${C.res}: ${data.t}`);
             rl.prompt(true);
         }
     } catch (e) {}
 });
 
-function joinRoom(room, asAdmin = false) {
-    if (currentRoom) client.unsubscribe(`anongram/v3/${currentRoom}`);
-    currentRoom = room;
-    isAdmin = asAdmin;
-    client.subscribe(`anongram/v3/${currentRoom}`);
-    drawHeader();
-    updatePrompt();
+function joinRoom(name, admin = false) {
+    if (room) client.unsubscribe(`anongram/v4/${room}`);
+    room = name;
+    isAdmin = admin;
+    client.subscribe(`anongram/v4/${room}`);
+    drawUI();
+    setPrompt();
     rl.prompt();
 }
 
-// --- ОБРАБОТКА КОМАНД ---
+// --- КОМАНДЫ ---
 rl.on('line', (line) => {
-    const text = line.trim();
-    if (!text) { rl.prompt(); return; }
+    const input = line.trim();
+    if (!input) { rl.prompt(); return; }
 
-    if (text.startsWith('/')) {
-        const [cmd, ...args] = text.split(' ');
+    if (input.startsWith('/')) {
+        const [cmd, ...args] = input.split(' ');
         switch(cmd) {
             case '/help':
-                console.log(`\n${C.b}ДОСТУПНЫЕ ПРОТОКОЛЫ:${C.res}`);
-                console.log(`  ${T.main}/croom [name]${C.res} - Инициализировать защищенный канал (Admin)`);
-                console.log(`  ${T.main}/room [name]${C.res}  - Подключиться к каналу`);
-                console.log(`  ${T.main}/nick [name]${C.res}  - Изменить цифровой идентификатор`);
-                console.log(`  ${T.main}/theme [name]${C.res} - Сменить визуальный интерфейс (matrix/fsociety/hack)`);
-                console.log(`  ${T.main}/clear${C.res}        - Сброс терминала`);
-                if (isAdmin) console.log(`  ${T.err}/kick [nick]${C.res}   - Разорвать соединение пользователя с каналом`);
-                console.log("");
+                console.log(`\n${C.b}COMMANDS:${C.res}\n/croom [n] - Create(Admin)\n/room [n]  - Join\n/nick [n]  - Nickname\n/theme [matrix/robot/ghost]\n/kick [u]  - Admin only\n/clear     - Reset screen\n`);
                 break;
             case '/croom': joinRoom(args[0] || 'private', true); break;
             case '/room': joinRoom(args[0] || 'global', false); break;
-            case '/theme':
-                if (C[args[0]]) { T = C[args[0]]; drawHeader(); }
-                break;
-            case '/nick': username = args[0] || username; drawHeader(); break;
-            case '/clear':
-                if (isAdmin) client.publish(`anongram/v3/${currentRoom}`, JSON.stringify({type:'system', action:'clear'}));
-                else drawHeader();
+            case '/nick': user = args[0] || user; drawUI(); break;
+            case '/theme': if (C[args[0]]) { T = C[args[0]]; drawUI(); } break;
+            case '/clear': 
+                if (isAdmin) client.publish(`anongram/v4/${room}`, JSON.stringify({type:'sys', act:'clr'}));
+                else drawUI(); 
                 break;
             case '/kick':
-                if (isAdmin) client.publish(`anongram/v3/${currentRoom}`, JSON.stringify({type:'system', action:'kick', target: args[0]}));
+                if (isAdmin) client.publish(`anongram/v4/${room}`, JSON.stringify({type:'sys', act:'kick', tgt: args[0]}));
                 break;
         }
     } else {
-        const msg = { type: 'chat', user: username, text: text };
-        client.publish(`anongram/v3/${currentRoom}`, JSON.stringify(msg));
-        process.stdout.write('\x1b[1A\x1b[2K');
+        const payload = { type: 'msg', u: user, t: input };
+        client.publish(`anongram/v4/${room}`, payload.type ? JSON.stringify(payload) : "");
+        
+        // Удаляем то, что ввел пользователь, и выводим красиво
+        process.stdout.write('\x1b[1A\x1b[2K'); 
         const time = new Date().toLocaleTimeString().slice(0, 5);
-        console.log(`${C.d}[${time}]${C.res} ${T.main}${"Я".padStart(10)}${C.res} ${C.b}${T.sec}>>${C.res} ${text}`);
+        console.log(`${C.d}${time}${C.res} ${C.b}YOU${C.res}: ${input}`);
     }
-    updatePrompt();
+    setPrompt();
     rl.prompt();
 });
