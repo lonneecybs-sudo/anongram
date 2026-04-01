@@ -4,117 +4,161 @@ const mqtt = require('mqtt');
 const readline = require('readline');
 const crypto = require('crypto');
 
-// Настройки сети
-const BROKER = 'mqtt://broker.hivemq.com'; // Публичный ретранслятор сообщений
-let room = 'global';
-// Генерируем случайный анонимный ник при входе
-let username = 'Anon_' + crypto.randomBytes(2).toString('hex');
+// --- ИНИЦИАЛИЗАЦИЯ ---
+const BROKER = 'mqtt://broker.hivemq.com';
+let currentRoom = 'global';
+let username = 'anon' + crypto.randomBytes(2).toString('hex');
+let isAdmin = false;
+let roomOwner = '';
+let history = []; // Храним последние 20 сообщений
 
-// Настройка интерфейса командной строки
+// --- ТЕМЫ ОФОРМЛЕНИЯ ---
+const themes = {
+    matrix: { main: "\x1b[32m", accent: "\x1b[1m", nick: "\x1b[36m", dim: "\x1b[90m" },
+    blood:  { main: "\x1b[31m", accent: "\x1b[1m", nick: "\x1b[33m", dim: "\x1b[31m\x1b[2m" },
+    ocean:  { main: "\x1b[34m", accent: "\x1b[36m", nick: "\x1b[37m", dim: "\x1b[90m" },
+    gold:   { main: "\x1b[33m", accent: "\x1b[1m", nick: "\x1b[32m", dim: "\x1b[90m" }
+};
+let T = themes.matrix;
+
+const LOGO = (theme) => `${theme.main}${theme.accent}
+  █████╗ ███╗   ██╗ ██████╗  
+ ██╔══██╗████╗  ██║██╔═══██╗ 
+ ███████║██╔██╗ ██║██║   ██║ 
+ ██╔══██║██║╚██╗██║██║   ██║ 
+ ██║  ██║██║ ╚████║╚██████╔╝ 
+ ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝  ${theme.reset}`;
+
+// --- ХЕЛПЕРЫ ---
+const getTime = () => new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
-    prompt: '\x1b[32m>\x1b[0m '
 });
 
-console.clear();
-console.log('\x1b[36m%s\x1b[0m', '=========================================');
-console.log('\x1b[36m%s\x1b[0m', ' 🕵️  ANONGRAM: Независимый Терминал-Чат');
-console.log('\x1b[36m%s\x1b[0m', '=========================================');
-console.log('\x1b[33mПодключение к P2P узлу...\x1b[0m');
+function updatePrompt() {
+    const adminTag = isAdmin ? `[${T.main}ADMIN${T.reset}]` : '';
+    rl.setPrompt(`${T.dim}─${adminTag}─[${T.reset}${T.main}${username}${T.reset}${T.dim}]─( ${T.nick}${currentRoom}${T.reset}${T.dim} )\n${T.reset}${T.main}██>${T.reset} `);
+}
 
-// Подключаемся к брокеру
+// --- СЕТЕВАЯ ЛОГИКА ---
 const client = mqtt.connect(BROKER);
 
 client.on('connect', () => {
-    readline.clearLine(process.stdout, 0);
-    readline.cursorTo(process.stdout, 0);
-    console.log('\x1b[32m[+] Успешное соединение с сетью!\x1b[0m');
-    joinRoom(room);
+    console.clear();
+    console.log(LOGO(T));
+    console.log(`${T.main}>>> СЕТЬ ПОДКЛЮЧЕНА${T.reset}\n`);
+    joinRoom('global');
 });
 
-function joinRoom(newRoom) {
-    if (room) client.unsubscribe(`anongram_net/${room}`);
-    room = newRoom;
-    client.subscribe(`anongram_net/${room}`);
-    console.log(`\n\x1b[35m[КАНАЛ]\x1b[0m Вы вошли в секретную комнату: \x1b[1m${room}\x1b[0m`);
-    console.log(`\x1b[35m[ИНФО]\x1b[0m Ваш текущий позывной: \x1b[1m${username}\x1b[0m`);
-    console.log('\x1b[90mВведите /help для списка команд.\x1b[0m\n');
-    rl.prompt();
-}
-
-// Прием входящих сообщений
+// Слушаем сообщения
 client.on('message', (topic, message) => {
-    try {
-        const msg = JSON.parse(message.toString());
-        // Не дублируем свои же сообщения
-        if (msg.user !== username) {
-            // Очищаем текущую строку ввода, чтобы сообщение не ломало текст
-            process.stdout.write('\x1b[2K\x1b[0G'); 
-            console.log(`\x1b[36m[${msg.user}]\x1b[0m: ${msg.text}`);
-            rl.prompt();
+    const data = JSON.parse(message.toString());
+
+    // Обработка истории (синхронизация)
+    if (data.type === 'history_sync' && currentRoom === data.room && history.length === 0) {
+        history = data.content;
+        history.forEach(msg => console.log(`${T.dim}${msg.time} ${T.nick}${msg.user}${T.reset}: ${msg.text}`));
+        rl.prompt(true);
+    }
+
+    // Служебные команды (Кик, Очистка)
+    if (data.type === 'system') {
+        if (data.action === 'kick' && data.target === username) {
+            console.log(`\n${T.blood}!!! ВАС КИКНУЛ АДМИН !!!${T.reset}`);
+            joinRoom('global');
         }
-    } catch (e) {
-        // Игнорируем битые пакеты
+        if (data.action === 'clear') {
+            console.clear();
+            console.log(`${T.main}--- Комната очищена админом ---${T.reset}`);
+            history = [];
+        }
+        return;
+    }
+
+    // Обычные сообщения
+    if (data.type === 'chat' && data.user !== username) {
+        process.stdout.write('\x1b[2K\x1b[0G'); 
+        console.log(`${T.dim}${getTime()} ${T.nick}${data.user}${T.reset}: ${data.text}`);
+        
+        // Добавляем в локальную историю
+        history.push({ time: getTime(), user: data.user, text: data.text });
+        if (history.length > 20) history.shift();
+        
+        rl.prompt(true);
     }
 });
 
-// Обработка ввода с клавиатуры
+function joinRoom(roomName, asAdmin = false) {
+    if (currentRoom) client.unsubscribe(`anongram/rooms/${currentRoom}`);
+    
+    currentRoom = roomName;
+    isAdmin = asAdmin;
+    history = [];
+    
+    client.subscribe(`anongram/rooms/${currentRoom}`);
+    
+    console.clear();
+    console.log(LOGO(T));
+    console.log(`\n${T.main}[*] Вход в комнату: ${roomName.toUpperCase()}${T.reset}`);
+    if (isAdmin) console.log(`${T.main}[!] Вы получили права АДМИНИСТРАТОРА${T.reset}`);
+    
+    // Запрос истории у тех, кто уже в комнате
+    client.publish(`anongram/rooms/${currentRoom}/req`, JSON.stringify({ type: 'history_req' }));
+    
+    updatePrompt();
+    rl.prompt();
+}
+
+// --- ОБРАБОТКА КОМАНД ---
 rl.on('line', (line) => {
     const text = line.trim();
     if (!text) { rl.prompt(); return; }
 
-    // Проверка на команды
     if (text.startsWith('/')) {
-        const args = text.split(' ');
-        const cmd = args[0].toLowerCase();
-
+        const [cmd, ...args] = text.split(' ');
         switch(cmd) {
-            case '/help':
-                console.log('\n\x1b[33m--- Доступные команды ---\x1b[0m');
-                console.log('\x1b[32m/nick [имя]\x1b[0m - сменить свой позывной');
-                console.log('\x1b[32m/room [имя]\x1b[0m - перейти в другую комнату (создать приватный канал)');
-                console.log('\x1b[32m/clear\x1b[0m      - очистить историю на экране');
-                console.log('\x1b[32m/exit\x1b[0m       - выйти из сети\n');
+            case '/croom': // Создать комнату (стать админом)
+                joinRoom(args[0] || 'private', true);
                 break;
-            case '/nick':
-                if (args[1]) {
-                    username = args[1];
-                    console.log(`\x1b[32m[+] Позывной изменен на: ${username}\x1b[0m`);
-                } else {
-                    console.log('\x1b[31m[-] Ошибка: укажите имя (например: /nick Hacker)\x1b[0m');
-                }
+            case '/room': // Просто зайти
+                joinRoom(args[0] || 'global', false);
                 break;
-            case '/room':
-                if (args[1]) {
-                    joinRoom(args[1]);
-                } else {
-                    console.log('\x1b[31m[-] Ошибка: укажите комнату (например: /room darknet)\x1b[0m');
-                }
+            case '/theme':
+                if (themes[args[0]]) {
+                    T = themes[args[0]];
+                    console.clear(); console.log(LOGO(T));
+                    console.log(`${T.main}Тема изменена!${T.reset}`);
+                } else { console.log("Доступны: matrix, blood, ocean, gold"); }
+                break;
+            case '/kick':
+                if (isAdmin) {
+                    client.publish(`anongram/rooms/${currentRoom}`, JSON.stringify({ type: 'system', action: 'kick', target: args[0] }));
+                } else { console.log("Только для админов!"); }
                 break;
             case '/clear':
-                console.clear();
+                if (isAdmin) {
+                    client.publish(`anongram/rooms/${currentRoom}`, JSON.stringify({ type: 'system', action: 'clear' }));
+                } else { console.clear(); console.log(LOGO(T)); }
                 break;
-            case '/exit':
-                console.log('\x1b[31mОтключение...\x1b[0m');
-                process.exit(0);
+            case '/nick':
+                username = args[0] || username;
+                updatePrompt();
                 break;
-            default:
-                console.log('\x1b[31m[-] Неизвестная команда. Введите /help\x1b[0m');
+            case '/help':
+                console.log("\n/croom [имя] - Создать (Админ)\n/room [имя] - Войти\n/theme [name] - Сменить тему\n/kick [ник] - Выгнать (Админ)\n/clear - Очистить чат\n/nick [имя] - Сменить ник\n");
+                break;
+            default: console.log("Неизвестная команда. /help");
         }
     } else {
-        // Отправка текстового сообщения в сеть
-        const payload = JSON.stringify({ user: username, text: text });
-        client.publish(`anongram_net/${room}`, payload);
+        const msg = { type: 'chat', user: username, text: text, time: getTime() };
+        client.publish(`anongram/rooms/${currentRoom}`, JSON.stringify(msg), { retain: true });
         
-        // Рисуем свое сообщение
-        process.stdout.write('\x1b[1A\x1b[2K'); // Удаляем введенную строку
-        console.log(`\x1b[90m[Вы]\x1b[0m: ${text}`);
+        // Сдвигаем курсор и пишем свое
+        process.stdout.write('\x1b[1A\x1b[2K');
+        console.log(`${T.dim}${getTime()} ${T.main}Я${T.reset}: ${text}`);
     }
+    updatePrompt();
     rl.prompt();
-});
-
-client.on('error', (err) => {
-    console.error('\n\x1b[31m[!] Ошибка сети:\x1b[0m', err.message);
-    process.exit(1);
 });
