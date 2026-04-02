@@ -1,40 +1,52 @@
 #!/bin/bash
 
-# Цвета для красоты в процессе установки
-G='\033[0;32m'
+# ANONGRAM - Анонимный чат в терминале
+# Установщик
+
+GREEN='\033[0;32m'
+CYAN='\033[0;36m'
+RED='\033[0;31m'
 NC='\033[0m'
 
-echo -e "${G}──────────────────────────────────────────${NC}"
-echo -e "${G}   ANONGRAM v3: INSTALLING CORE...       ${NC}"
-echo -e "${G}──────────────────────────────────────────${NC}"
+echo -e "${CYAN}"
+echo "╔════════════════════════════╗"
+echo "║       █████╗ ███╗   ██╗    ║"
+echo "║      ██╔══██╗████╗  ██║    ║"
+echo "║      ███████║██╔██╗ ██║    ║"
+echo "║      ██╔══██║██║╚██╗██║    ║"
+echo "║      ██║  ██║██║ ╚████║    ║"
+echo "║      ╚═╝  ╚═╝╚═╝  ╚═══╝    ║"
+echo "╚════════════════════════════╝"
+echo -e "${NC}"
 
-# 1. Ставим базу
-pkg install nodejs curl -y
+echo -e "${GREEN}Установка ANONGRAM...${NC}"
 
-# 2. Подготовка папок
+# Проверяем Node.js
+if ! command -v node &> /dev/null; then
+    echo -e "${RED}Node.js не установлен!${NC}"
+    echo "Установите Node.js: https://nodejs.org/"
+    exit 1
+fi
+
+# Создаем папку
 mkdir -p ~/.anongram
 cd ~/.anongram
 
-# 3. Качаем сам мессенджер (проверь ник в ссылке!)
-echo -e "[*] Downloading index.js..."
-curl -sL https://raw.githubusercontent.com/lonneecybs-sudo/anongram/main/index.js -o index.js
+# Скачиваем зашифрованный файл
+echo -e "${GREEN}Загрузка ANONGRAM...${NC}"
+curl -sL -o anongram.js https://raw.githubusercontent.com/lonneecybs-sudo/anongram/main/anongram.js
 
-# 4. Ставим только нужный сетевой протокол (MQTT)
-echo -e "[*] Setting up network protocols..."
-npm install mqtt --quiet
+# Устанавливаем зависимости
+echo -e "${GREEN}Установка зависимостей...${NC}"
+npm install mqtt readline crypto 2>/dev/null
 
-# 5. Делаем магию исполняемого файла
-chmod +x index.js
+# Делаем исполняемым
+chmod +x anongram.js
 
-# Создаем системную команду 'anongram'
-if [ -d "$PREFIX/bin" ]; then
-    # Для Termux
-    ln -sf ~/.anongram/index.js $PREFIX/bin/anongram
-else
-    # Для обычного Linux
-    sudo ln -sf ~/.anongram/index.js /usr/local/bin/anongram
-fi
+# Создаем ссылку
+sudo ln -sf ~/.anongram/anongram.js /usr/local/bin/anongram 2>/dev/null || {
+    echo -e "${GREEN}Или запускайте так: node ~/.anongram/anongram.js${NC}"
+}
 
-echo -e "\n${G}✅ УСТАНОВКА ЗАВЕРШЕНА!${NC}"
-echo -e "Просто введи: ${G}anongram${NC}"
-echo -e "Внутри чата напиши ${G}/help${NC} для просмотра новых команд."
+echo -e "${GREEN}✅ Установка завершена!${NC}"
+echo -e "${CYAN}Запустите: anongram${NC}"
