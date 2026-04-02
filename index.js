@@ -1,24 +1,386 @@
 #!/usr/bin/env node
 
-// ЗАШИФРОВАННЫЙ КОД ANONGRAM
-const encrypted = "\u2f75\u6e73\u7420\u7520\u3d20\u7141\u5371\u6e21\u7c73\u222b\u6141\u745f\u6f66\u222b\u2f76\u6f6e\u7420\u2d20\u222b\u2f77\u6874\u6d65\u7320\u3d20\u7141\u222b\u2f78\u6d71\u7420\u2d20\u7141\u5371\u222b\u2f79\u636c\u6965\u6e74\u2e20\u222b\u2f7a\u6f6e\u7420\u2820\u2763\u6865\u6e65\u6c6c\u222b\u2f7b\u6f66\u7420\u2820\u2763\u696e\u7075\u7475\u222b\u2f7c\u6f66\u7420\u2820\u2763\u7275\u6164\u6c69\u6e65\u222b\u2f7d\u6f66\u7420\u2820\u2763\u7379\u7374\u656d\u222b\u2f7e\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2f7f\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2f80\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2f81\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2f82\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2f83\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2f84\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2f85\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2f86\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2f87\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2f88\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2f89\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2f8a\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2f8b\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2f8c\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2f8d\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2f8e\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2f8f\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2f90\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2f91\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2f92\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2f93\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2f94\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2f95\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2f96\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2f97\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2f98\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2f99\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2f9a\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2f9b\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2f9c\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2f9d\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2f9e\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2f9f\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fa0\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fa1\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fa2\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fa3\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fa4\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fa5\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fa6\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fa7\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fa8\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fa9\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2faa\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fab\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fac\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fad\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fae\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2faf\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fb0\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fb1\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fb2\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fb3\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fb4\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fb5\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fb6\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fb7\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fb8\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fb9\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fba\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fbb\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fbc\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fbd\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fbe\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fbf\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fc0\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fc1\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fc2\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fc3\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fc4\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fc5\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fc6\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fc7\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fc8\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fc9\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fca\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fcb\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fcc\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fcd\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fce\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fcf\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fd0\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fd1\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fd2\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fd3\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fd4\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fd5\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fd6\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fd7\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fd8\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fd9\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fda\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fdb\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fdc\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fdd\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fde\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fdf\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fe0\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fe1\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fe2\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fe3\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fe4\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fe5\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fe6\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fe7\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fe8\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fe9\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fea\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2feb\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fec\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fed\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fee\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fef\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2ff0\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2ff1\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2ff2\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2ff3\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2ff4\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2ff5\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2ff6\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2ff7\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2ff8\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2ff9\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2ffa\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2ffb\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2ffc\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2ffd\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2ffe\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u2fff\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u3000\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u3001\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u3002\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u3003\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u3004\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b\u3005\u6f66\u7420\u2820\u2763\u6372\u7970\u746f\u222b";
+const mqtt = require('mqtt');
+const readline = require('readline');
+const crypto = require('crypto');
 
-// Дешифратор с нарастающим сдвигом
-function decode(str) {
-    let result = '';
-    let shift = 187;
-    const regex = /\\u([0-9a-fA-F]{4})/g;
+// --- РАСШИРЕННАЯ ПАЛИТРА ---
+const C = {
+    reset: "\x1b[0m",
+    bold: "\x1b[1m",
+    dim: "\x1b[2m",
     
-    str.replace(regex, (match, hex) => {
-        const code = parseInt(hex, 16);
-        const original = code - shift;
-        result += String.fromCharCode(original);
-        shift++;
-        return match;
-    });
+    black: "\x1b[30m",
+    red: "\x1b[31m",
+    green: "\x1b[32m",
+    yellow: "\x1b[33m",
+    blue: "\x1b[34m",
+    magenta: "\x1b[35m",
+    cyan: "\x1b[36m",
+    white: "\x1b[37m",
     
-    return result;
+    brightRed: "\x1b[91m",
+    brightGreen: "\x1b[92m",
+    brightYellow: "\x1b[93m",
+    brightBlue: "\x1b[94m",
+    brightMagenta: "\x1b[95m",
+    brightCyan: "\x1b[96m"
+};
+
+// --- ТЕМЫ ---
+const Themes = {
+    matrix: {
+        name: "🌿 MATRIX",
+        primary: C.green,
+        secondary: C.brightGreen,
+        accent: C.yellow,
+        border: C.green,
+        error: C.red,
+        success: C.brightGreen,
+        info: C.cyan,
+        logo: `
+${C.green}╔════════════════════╗
+║  █████╗ ███╗   ██╗ ║
+║ ██╔══██╗████╗  ██║ ║
+║ ███████║██╔██╗ ██║ ║
+║ ██╔══██║██║╚██╗██║ ║
+║ ██║  ██║██║ ╚████║ ║
+║ ╚═╝  ╚═╝╚═╝  ╚═══╝ ║
+╚════════════════════╝
+${C.dim}└── MATRIX EDITION ──┘${C.reset}`
+    },
+    robot: {
+        name: "🤖 FSOCIETY",
+        primary: C.red,
+        secondary: C.brightRed,
+        accent: C.brightYellow,
+        border: C.red,
+        error: C.brightRed,
+        success: C.green,
+        info: C.blue,
+        logo: `
+${C.red}╔════════════════════╗
+║  ███████╗███████╗  ║
+║  ██╔════╝██╔════╝  ║
+║  █████╗  ███████╗  ║
+║  ██╔══╝  ╚════██║  ║
+║  ██║     ███████║  ║
+║  ╚═╝     ╚══════╝  ║
+╚════════════════════╝
+${C.dim}└── FSOCIETY MODE ──┘${C.reset}`
+    },
+    ghost: {
+        name: "👻 GHOST",
+        primary: C.magenta,
+        secondary: C.brightMagenta,
+        accent: C.cyan,
+        border: C.magenta,
+        error: C.red,
+        success: C.green,
+        info: C.brightCyan,
+        logo: `
+${C.magenta}╔════════════════════╗
+║  ██████╗ ██╗  ██╗ ║
+║  ██╔════╝██║  ██║ ║
+║  ██║     ███████║ ║
+║  ██║     ██╔══██║ ║
+║  ╚██████╗██║  ██║ ║
+║   ╚═════╝╚═╝  ╚═╝ ║
+╚════════════════════╝
+${C.dim}└── GHOST MODE ────┘${C.reset}`
+    }
+};
+
+let T = Themes.matrix;
+let room = 'global';
+let user = '';
+let isAdmin = false;
+let activeUsers = new Set(); // Хранилище активных ников
+
+// --- ФУНКЦИИ ИНТЕРФЕЙСА ---
+function drawHeader() {
+    console.clear();
+    console.log(T.logo);
+    
+    // Статус-бар
+    const roleIcon = isAdmin ? '👑' : '👤';
+    const roomIcon = '💬';
+    const userIcon = '📝';
+    
+    console.log(`\n${T.border}┌────────────────────────┐${C.reset}`);
+    console.log(`${T.border}│ ${roomIcon} ${T.primary}${room.padEnd(12)}${C.reset} ${userIcon} ${T.accent}${user.padEnd(8)}${C.reset} ${T.border}│`);
+    console.log(`${T.border}│ ${roleIcon} ${isAdmin ? 'ADMIN' : 'USER'.padEnd(5)} ${T.dim}●${C.reset} ${T.secondary}${T.name.padEnd(12)}${C.reset} ${T.border}│`);
+    console.log(`${T.border}└────────────────────────┘${C.reset}\n`);
 }
 
-// Запускаем
-eval(decode(encrypted));
+function drawFullHelp() {
+    console.log(`\n${T.accent}╔══════════════════════════════════════╗${C.reset}`);
+    console.log(`${T.accent}║        📚 ALL COMMANDS LIST         ║${C.reset}`);
+    console.log(`${T.accent}╚══════════════════════════════════════╝${C.reset}\n`);
+    
+    console.log(`${T.secondary}┌────────────────────────────────┐${C.reset}`);
+    console.log(`${T.secondary}│ 💬 GENERAL COMMANDS            │${C.reset}`);
+    console.log(`${T.secondary}├────────────────────────────────┤${C.reset}`);
+    console.log(`${T.secondary}│ ${T.accent}/help${' '.repeat(8)}${C.reset}• Show this help menu     ${T.secondary}│${C.reset}`);
+    console.log(`${T.secondary}│ ${T.accent}/nick [name]${' '.repeat(4)}${C.reset}• Change nickname         ${T.secondary}│${C.reset}`);
+    console.log(`${T.secondary}│ ${T.accent}/theme [name]${' '.repeat(4)}${C.reset}• Change theme            ${T.secondary}│${C.reset}`);
+    console.log(`${T.secondary}│ ${T.accent}/clear${' '.repeat(7)}${C.reset}• Clear screen            ${T.secondary}│${C.reset}`);
+    console.log(`${T.secondary}├────────────────────────────────┤${C.reset}`);
+    console.log(`${T.secondary}│ 🏠 ROOM COMMANDS                │${C.reset}`);
+    console.log(`${T.secondary}├────────────────────────────────┤${C.reset}`);
+    console.log(`${T.secondary}│ ${T.accent}/room [name]${' '.repeat(4)}${C.reset}• Join room               ${T.secondary}│${C.reset}`);
+    console.log(`${T.secondary}│ ${T.accent}/croom [name]${' '.repeat(3)}${C.reset}• Create room (admin)     ${T.secondary}│${C.reset}`);
+    
+    if (isAdmin) {
+        console.log(`${T.secondary}├────────────────────────────────┤${C.reset}`);
+        console.log(`${T.secondary}│ 👑 ADMIN COMMANDS               │${C.reset}`);
+        console.log(`${T.secondary}├────────────────────────────────┤${C.reset}`);
+        console.log(`${T.secondary}│ ${T.accent}/kick [user]${' '.repeat(4)}${C.reset}• Kick user               ${T.secondary}│${C.reset}`);
+    }
+    
+    console.log(`${T.secondary}└────────────────────────────────┘${C.reset}\n`);
+    
+    console.log(`${T.info}💡 Available themes: ${T.accent}matrix${C.reset}, ${T.accent}robot${C.reset}, ${T.accent}ghost${C.reset}`);
+    console.log(`${T.info}💬 Just type your message to chat\n${C.reset}`);
+}
+
+function displayMessage(sender, text, isOwn = false) {
+    const time = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+    const shortText = text.length > 55 ? text.slice(0, 52) + '...' : text;
+    
+    if (isOwn) {
+        console.log(`${C.dim}${time}${C.reset} ${T.accent}▶${C.reset} ${T.secondary}${sender}${C.reset}: ${T.primary}${shortText}${C.reset}`);
+    } else {
+        console.log(`${C.dim}${time}${C.reset} ${T.primary}◀${C.reset} ${T.primary}${sender}${C.reset}: ${T.secondary}${shortText}${C.reset}`);
+    }
+}
+
+// --- ФУНКЦИЯ ВЫБОРА НИКА ---
+async function chooseNickname() {
+    return new Promise((resolve) => {
+        console.clear();
+        console.log(T.logo);
+        console.log(`\n${T.accent}╔════════════════════════════╗${C.reset}`);
+        console.log(`${T.accent}║   WELCOME TO ANONGRAM!   ║${C.reset}`);
+        console.log(`${T.accent}╚════════════════════════════╝${C.reset}\n`);
+        console.log(`${T.secondary}Choose your nickname:${C.reset}`);
+        console.log(`${T.dim}(min 2 chars, max 15 chars)${C.reset}\n`);
+        
+        const askNick = () => {
+            rl.question(`${T.accent}➤ ${C.reset}`, (nick) => {
+                nick = nick.trim();
+                
+                if (!nick || nick.length < 2) {
+                    console.log(`${T.error}✗ Nickname must be at least 2 characters${C.reset}`);
+                    askNick();
+                } else if (nick.length > 15) {
+                    console.log(`${T.error}✗ Nickname too long (max 15 chars)${C.reset}`);
+                    askNick();
+                } else if (/[^\wа-яА-Я\-_]/.test(nick)) {
+                    console.log(`${T.error}✗ Use only letters, numbers, - and _${C.reset}`);
+                    askNick();
+                } else {
+                    resolve(nick);
+                }
+            });
+        };
+        
+        askNick();
+    });
+}
+
+// --- СЕТЬ С ПРОВЕРКОЙ УНИКАЛЬНОСТИ ---
+const client = mqtt.connect('mqtt://broker.hivemq.com', {
+    keepalive: 60,
+    reconnectPeriod: 1000
+});
+
+client.on('connect', async () => {
+    // Запрашиваем ник при подключении
+    user = await chooseNickname();
+    
+    // Проверяем уникальность ника
+    client.publish('anongram/v4/check_nick', JSON.stringify({ type: 'check', nick: user }));
+    
+    // Ждем ответ о уникальности
+    setTimeout(() => {
+        drawHeader();
+        joinRoom('global');
+        console.log(`${T.success}✓ Connected as ${T.accent}${user}${C.reset}`);
+        drawFullHelp(); // Показываем все команды при старте
+        setPrompt();
+        rl.prompt();
+    }, 500);
+});
+
+client.on('message', (topic, message) => {
+    try {
+        const data = JSON.parse(message.toString());
+        
+        // Обработка проверки ника
+        if (data.type === 'nick_check') {
+            if (!data.available && data.nick === user) {
+                console.log(`\n${T.error}✗ Nickname "${user}" is already taken!${C.reset}`);
+                console.log(`${T.secondary}Please choose another one:${C.reset}`);
+                chooseNickname().then(newNick => {
+                    user = newNick;
+                    drawHeader();
+                    console.log(`${T.success}✓ Nickname changed to ${T.accent}${user}${C.reset}`);
+                    setPrompt();
+                    rl.prompt();
+                });
+            }
+            return;
+        }
+
+        if (data.type === 'sys') {
+            if (data.act === 'kick' && data.tgt === user) {
+                console.log(`\n${T.error}⚠️  YOU WERE KICKED FROM ${room} ⚠️${C.reset}`);
+                setTimeout(() => joinRoom('global'), 1500);
+                return;
+            }
+            if (data.act === 'clr') { 
+                drawHeader();
+                console.log(`${T.success}✨ Screen cleared by admin${C.reset}`);
+            }
+            return;
+        }
+
+        if (data.type === 'msg' && data.u !== user) {
+            process.stdout.write('\r\x1b[2K');
+            displayMessage(data.u, data.t);
+            rl.prompt(true);
+        }
+    } catch (e) {}
+});
+
+function joinRoom(name, admin = false) {
+    if (room) client.unsubscribe(`anongram/v4/${room}`);
+    room = name;
+    isAdmin = admin;
+    client.subscribe(`anongram/v4/${room}`);
+    drawHeader();
+    
+    const roleText = admin ? `${T.accent}ADMIN${C.reset}` : `${T.secondary}USER${C.reset}`;
+    console.log(`${T.success}✓ Joined "${T.primary}${room}${C.reset}" as ${roleText}${C.reset}`);
+    setPrompt();
+    rl.prompt();
+}
+
+// --- ИНТЕРФЕЙС ВВОДА ---
+const rl = readline.createInterface({ 
+    input: process.stdin, 
+    output: process.stdout,
+    terminal: true
+});
+
+function setPrompt() {
+    const promptSymbol = isAdmin ? `${T.accent}⚡${C.reset}` : `${T.secondary}➤${C.reset}`;
+    rl.setPrompt(`${promptSymbol} `);
+}
+
+// --- ОБРАБОТКА КОМАНД ---
+rl.on('line', (line) => {
+    const input = line.trim();
+    if (!input) { 
+        rl.prompt(); 
+        return; 
+    }
+
+    if (input.startsWith('/')) {
+        const [cmd, ...args] = input.split(' ');
+        
+        switch(cmd) {
+            case '/help':
+                drawFullHelp();
+                break;
+                
+            case '/croom':
+                if (!args[0]) {
+                    console.log(`${T.error}✗ Usage: /croom [room_name]${C.reset}`);
+                } else {
+                    joinRoom(args[0], true);
+                }
+                break;
+                
+            case '/room':
+                joinRoom(args[0] || 'global', false);
+                break;
+                
+            case '/nick':
+                if (!args[0]) {
+                    console.log(`${T.error}✗ Usage: /nick [new_nickname]${C.reset}`);
+                } else if (args[0].length < 2) {
+                    console.log(`${T.error}✗ Nickname must be at least 2 chars${C.reset}`);
+                } else if (args[0].length > 15) {
+                    console.log(`${T.error}✗ Nickname too long (max 15)${C.reset}`);
+                } else {
+                    const oldNick = user;
+                    user = args[0];
+                    
+                    // Проверяем уникальность нового ника
+                    client.publish('anongram/v4/check_nick', JSON.stringify({ type: 'check', nick: user }));
+                    
+                    drawHeader();
+                    console.log(`${T.success}✓ Nickname changed: ${oldNick} → ${T.accent}${user}${C.reset}`);
+                }
+                break;
+                
+            case '/theme':
+                if (!args[0]) {
+                    console.log(`${T.secondary}Available themes: matrix, robot, ghost${C.reset}`);
+                } else if (Themes[args[0]]) {
+                    T = Themes[args[0]];
+                    drawHeader();
+                    console.log(`${T.success}✓ Theme changed to ${T.name}${C.reset}`);
+                } else {
+                    console.log(`${T.error}✗ Theme "${args[0]}" not found${C.reset}`);
+                }
+                break;
+                
+            case '/clear':
+                if (isAdmin) {
+                    client.publish(`anongram/v4/${room}`, JSON.stringify({type:'sys', act:'clr'}));
+                    console.log(`${T.success}✓ Screen cleared for all users${C.reset}`);
+                } else {
+                    drawHeader();
+                    console.log(`${T.success}✓ Screen cleared${C.reset}`);
+                }
+                break;
+                
+            case '/kick':
+                if (!args[0]) {
+                    console.log(`${T.error}✗ Usage: /kick [username]${C.reset}`);
+                } else if (isAdmin) {
+                    client.publish(`anongram/v4/${room}`, JSON.stringify({type:'sys', act:'kick', tgt: args[0]}));
+                    console.log(`${T.success}✓ Kicked: ${args[0]}${C.reset}`);
+                } else {
+                    console.log(`${T.error}✗ Admin only command${C.reset}`);
+                }
+                break;
+                
+            default:
+                console.log(`${T.error}✗ Unknown command. Type ${T.accent}/help${C.reset} for commands${C.reset}`);
+                break;
+        }
+    } else {
+        // Отправка сообщения
+        const payload = { type: 'msg', u: user, t: input };
+        client.publish(`anongram/v4/${room}`, JSON.stringify(payload));
+        
+        // Очистка и отображение
+        process.stdout.write('\x1b[1A\x1b[2K');
+        displayMessage(user, input, true);
+    }
+    
+    setPrompt();
+    rl.prompt();
+});
+
+// --- ОБРАБОТКА ВЫХОДА ---
+process.on('SIGINT', () => {
+    console.log(`\n${T.secondary}👋 Goodbye, ${user}!${C.reset}`);
+    client.end();
+    rl.close();
+    process.exit(0);
+});
